@@ -1,8 +1,12 @@
-#include <Arduino.h>
+#include <SD_MMC.h>
+#include <M5Stack.h>
+#include <WiFi.h>
+#include <FFat.h>
 #include <Adafruit_NeoPixel.h>
-#include <M5Unified.h>
-#include <DFRobotDFPlayerMini.h>
-#include <SD.h>
+#include "AudioFileSourceSD.h"
+#include "AudioFileSourceID3.h"
+#include "AudioGeneratorMP3.h"
+#include "AudioOutputI2S.h"
 
 #define NEO_GRB     0 // NEOPIXEL LEDストリップのカラーオーダー
 #define NEO_KHZ800  800000 // LEDストリップの周波数
@@ -13,72 +17,69 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 int delayval = 10; 
 int volume = 1;
 
-DFRobotDFPlayerMini player;
+AudioGeneratorMP3 *mp3;
+AudioFileSourceSD *file;
+AudioOutputI2S *out;
+AudioFileSourceID3 *id3;
 
-void setup() {
-  M5.begin();
-  M5.Power.begin();
-  pixels.begin();
-  pinMode(36, INPUT);
+bool flag_mp3IsPlayed = false;
 
-  if (!SD.begin()) {
-    M5.Lcd.println("SD Card initialization failed!");
-    return;
-  }
-  
-  if (!player.begin(Serial2)) {
-    M5.Lcd.println("Unable to begin DFPlayer Mini");
-    while(true);
-  }
-  
-  player.volume(50);  // Set volume level (0~30).
-}
-
-void loop() {
-  M5.update();
-  M5.Lcd.setCursor(30,120);
-  M5.update();
-  
-  int color_r = random(255);
-  int color_g = random(255);
-  int color_b = random(255);
-  
-  for (int i = 0; i < NUMPIXELS; i++) {
-    pixels.setPixelColor(i, pixels.Color(color_r, color_g, color_b)); 
-    pixels.show(); 
-    delay(delayval);
-  }
-  
-  if(M5.BtnA.wasPressed()) {
-    playMP3();
-  }
-  
-  if(M5.BtnC.wasPressed()) {
-    player.stop();
-  }
-  
-  if(digitalRead(36) == 1) {
-    M5.Lcd.clear();
-    M5.Lcd.print("!!!");
-    // Do something when sensor is triggered
-  }
-  
-  M5.delay(10);
-}
-
-void playMP3() {
-  File root = SD.open("/");
-  File file = root.openNextFile();
-  
-  while(file) {
-    String fileName = file.name();
-    
-    if(fileName.endsWith(".mp3")) {
-      // ファイル名が ".mp3" で終わる場合、再生を開始する
-      player.play(fileName.c_str()); // ファイル名を文字列として渡す
-      return;
+void playMp3(){
+    file = new AudioFileSourceSD("/1.mp3");
+    id3 = new AudioFileSourceID3(file);
+    out = new AudioOutputI2S(0, 1); // Output to builtInDAC
+    out->SetOutputModeMono(true);
+    out->SetGain(0.3);
+    mp3 = new AudioGeneratorMP3();
+    mp3->begin(id3, out);
+    while(mp3->isRunning()){
+        if (!mp3->loop()) mp3->stop();
     }
-    
-    file = root.openNextFile();
-  }
+}
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(10);
+
+    M5.begin();
+
+    // SDカードの初期化
+    if (!SD.begin()) {
+        Serial.println("Card Mount Failed");
+        return;
+    }
+    Serial.println("Card Initialized");
+
+    // 画面にPNGファイルを表示
+    M5.Lcd.drawJpgFile(SD, "/1.png");
+}
+
+void loop()
+{
+    M5.update();
+
+    if(M5.BtnB.isPressed()){
+        playMp3();
+        flag_mp3IsPlayed = true;
+    }
+  
+    // LEDストリップの点灯処理
+    int color_r = random(255);
+    int color_g = random(255);
+    int color_b = random(255);
+    for (int i = 0; i < NUMPIXELS; i++) {
+        pixels.setPixelColor(i, pixels.Color(color_r, color_g, color_b)); 
+        pixels.show(); 
+    }
+  
+    delay(100); // 点灯時間
+    pixels.clear(); // LEDを消灯するために全てのピクセルをクリア
+    pixels.show(); // LEDを更新して消灯させる
+    delay(100); // 消灯時間
+
+    // 画面更新処理
+   // M5.Lcd.drawPngFile(SD, "/1.png");
+
+    delay(100);
 }
