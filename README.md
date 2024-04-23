@@ -6,10 +6,10 @@
 *  ██║╚██╔╝██║██║   ██║██╔══╝  ██╔══██╗  ╚██╔╝    *
 *  ██║ ╚═╝ ██║╚██████╔╝███████╗██║  ██║   ██║     *
 *  ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝     *
-*                                                *
-*                MH ・ LABO                     *
-*                                                *
-*        NO COPYING, DOWNLOADING,                *
-*      MODIFICATION, OR REDISTRIBUTION           *
-*                                                *
+*                                               　 *
+*                MH ・ LABO                     　　*
+*                                              　  *
+*        NO COPYING　DOWNLOADING,               　 *
+*     NO MODIFICATION　REDISTRIBUTION           　　*
+*                                               　 *
 **************************************************
