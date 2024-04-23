@@ -15,7 +15,7 @@
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 int delayval = 10; 
-int volume = 1;
+int volume = 100;
 
 AudioGeneratorMP3 *mp3;
 AudioFileSourceSD *file;
@@ -24,12 +24,14 @@ AudioFileSourceID3 *id3;
 
 bool flag_mp3IsPlayed = false;
 
-void playMp3(){
-    file = new AudioFileSourceSD("/1.mp3");
+
+
+void playStartupMp3(){
+    file = new AudioFileSourceSD("/startup.mp3");
     id3 = new AudioFileSourceID3(file);
     out = new AudioOutputI2S(0, 1); // Output to builtInDAC
     out->SetOutputModeMono(true);
-    out->SetGain(0.3);
+    out->SetGain(1.3);
     mp3 = new AudioGeneratorMP3();
     mp3->begin(id3, out);
     while(mp3->isRunning()){
@@ -37,10 +39,48 @@ void playMp3(){
     }
 }
 
+
+void play1Mp3(){
+    file = new AudioFileSourceSD("/yobikomi1.mp3");
+    id3 = new AudioFileSourceID3(file);
+    out = new AudioOutputI2S(0, 1); // Output to builtInDAC
+    out->SetOutputModeMono(true);
+    out->SetGain(1.3);
+    mp3 = new AudioGeneratorMP3();
+    mp3->begin(id3, out);
+    while(mp3->isRunning()){
+        if (!mp3->loop()) mp3->stop();
+    }
+}
+void play2Mp3(){
+    file = new AudioFileSourceSD("/yobikomi2.mp3");
+    id3 = new AudioFileSourceID3(file);
+    out = new AudioOutputI2S(0, 1); // Output to builtInDAC
+    out->SetOutputModeMono(true);
+    out->SetGain(1.3);
+    mp3 = new AudioGeneratorMP3();
+    mp3->begin(id3, out);
+    while(mp3->isRunning()){
+        if (!mp3->loop()) mp3->stop();
+    }
+}
+void play3Mp3(){
+    file = new AudioFileSourceSD("/1.mp3");
+    id3 = new AudioFileSourceID3(file);
+    out = new AudioOutputI2S(0, 1); // Output to builtInDAC
+    out->SetOutputModeMono(true);
+    out->SetGain(1.3);
+    mp3 = new AudioGeneratorMP3();
+    mp3->begin(id3, out);
+    while(mp3->isRunning()){
+        if (!mp3->loop()) mp3->stop();
+    }
+}
 void setup()
 {
     Serial.begin(115200);
     delay(10);
+    pinMode(36,INPUT);
 
     M5.begin();
 
@@ -51,18 +91,29 @@ void setup()
     }
     Serial.println("Card Initialized");
 
+    
+        playStartupMp3();
+
     // 画面にPNGファイルを表示
-    M5.Lcd.drawJpgFile(SD, "/1.png");
+    //M5.Lcd.drawJpgFile(SD, "/1.png");
 }
 
 void loop()
 {
     M5.update();
 
-    if(M5.BtnB.isPressed()){
-        playMp3();
+    if(M5.BtnA.isPressed()||digitalRead(36) == 1){
+        play1Mp3();
         flag_mp3IsPlayed = true;
     }
+        if(M5.BtnB.isPressed()){
+        play2Mp3();
+        flag_mp3IsPlayed = true;
+    }
+         if(M5.BtnC.isPressed()){
+        play3Mp3();
+        flag_mp3IsPlayed = true;
+    }   
   
     // LEDストリップの点灯処理
     int color_r = random(255);
