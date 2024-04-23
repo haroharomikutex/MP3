@@ -9,7 +9,7 @@
 *                                               　 *
 *                MH ・ LABO                     　　*
 *                                              　  *
-*        NO COPYING　DOWNLOADING,               　 *
-*     NO MODIFICATION　REDISTRIBUTION           　　*
+*        Don't COPYING　DOWNLOADING,               　 *
+*     Don't MODIFICATION　REDISTRIBUTION           　　*
 *                                               　 *
 **************************************************
